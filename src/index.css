@@ -1,0 +1,93 @@
+@import "tailwindcss";
+
+@theme {
+  --font-display: "Montserrat", "Trebuchet MS", system-ui, sans-serif;
+  --font-sans: "Jost", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --color-brand-red: #d3141c;
+  --color-brand-deep: #8f0c12;
+  --color-brand-ink: #2b0d0f;
+  --color-brand-muted: #6e4a4c;
+  --color-brand-line: #f2d4d5;
+  --color-brand-tint: #fdf6f6;
+}
+
+@layer base {
+  html {
+    scroll-behavior: smooth;
+    color-scheme: light;
+    -webkit-text-size-adjust: 100%;
+  }
+
+  body {
+    margin: 0;
+    background-color: #ffffff;
+    color: var(--color-brand-ink);
+    font-family: var(--font-sans);
+    -webkit-font-smoothing: antialiased;
+  }
+
+  h1,
+  h2,
+  h3 {
+    font-family: var(--font-display);
+    text-wrap: balance;
+  }
+
+  :focus-visible {
+    outline: 3px solid var(--color-brand-red);
+    outline-offset: 3px;
+    border-radius: 6px;
+  }
+}
+
+.jas-hero-panel {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  background: linear-gradient(160deg, #dc2a30 0%, #b3121a 60%, #7f0b11 100%);
+}
+
+.jas-hero-panel::before {
+  content: "";
+  position: absolute;
+  z-index: -1;
+  right: -6%;
+  top: 50%;
+  height: 150%;
+  aspect-ratio: 560 / 558;
+  transform: translateY(-50%);
+  background: #ffffff;
+  opacity: 0.13;
+  -webkit-mask: url("/assets/jas/watermark.png") center / contain no-repeat;
+  mask: url("/assets/jas/watermark.png") center / contain no-repeat;
+  pointer-events: none;
+}
+
+.jas-contact-panel::before {
+  height: 185%;
+  right: -11%;
+}
+
+@keyframes jasFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.jas-fade-in {
+  animation: jasFadeIn 220ms ease-out both;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+  .jas-fade-in {
+    animation: none;
+  }
+}

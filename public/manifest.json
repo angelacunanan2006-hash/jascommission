@@ -1,0 +1,17 @@
+{
+  "name": "Ja’s Commission",
+  "short_name": "Ja’s Commission",
+  "description": "DTI-registered graphic design, research, IT, data, CAD, and AI commission service in Manila. Send the task, get the final file.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#d3141c",
+  "icons": [
+    {
+      "src": "/assets/jas/logo.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    }
+  ]
+}
