@@ -219,9 +219,20 @@ export function PortfolioFeedbackBoard({
         typeof err === 'object' && err !== null && 'code' in err
           ? String((err as { code?: string }).code)
           : '';
-      if (code !== 'auth/popup-closed-by-user') {
+      if (code === 'auth/popup-closed-by-user' || code === 'auth/cancelled-popup-request') {
+        // User dismissed the popup intentionally
+      } else if (code === 'auth/unauthorized-domain') {
+        const host = window.location.hostname;
         setFormError(
-          'Could not complete Google sign-in. Please allow popups and try again.'
+          `This website domain (${host}) needs to be added under Firebase Console → Authentication → Settings → Authorized domains before Google sign-in works here.`
+        );
+      } else if (code === 'auth/popup-blocked') {
+        setFormError(
+          'Your browser blocked the Google sign-in popup. Please allow popups for this site (or open the link directly in Chrome or Safari) and try again.'
+        );
+      } else {
+        setFormError(
+          `Could not complete Google sign-in${code ? ` (${code})` : ''}. Please open in Chrome or Safari and try again.`
         );
       }
     } finally {
