@@ -1,0 +1,134 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Global Safety Net: Default-deny catch-all
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    // Hardened Global Helpers
+    function isValidId(id) {
+      return id is string
+        && id.size() >= 1
+        && id.size() <= 128
+        && id.matches('^[a-zA-Z0-9_\\-]+$');
+    }
+
+    function incoming() {
+      return request.resource.data;
+    }
+
+    function existing() {
+      return resource.data;
+    }
+
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isVerifiedUser() {
+      return isSignedIn() && request.auth.token.email_verified == true;
+    }
+
+    function isAdmin() {
+      return isVerifiedUser()
+        && request.auth.token.email == 'angelacunanan2006@gmail.com';
+    }
+
+    function isValidFeedbackCategory(category) {
+      return category in [
+        'Portfolio & General',
+        'Graphic & Video',
+        'Research & Docs',
+        'IT & Coding',
+        'Data & Excel',
+        'Architecture & CAD',
+        'AI Services'
+      ];
+    }
+
+    function isValidFeedback(data) {
+      return data.keys().hasAll([
+          'authorUid',
+          'authorName',
+          'rating',
+          'category',
+          'message',
+          'status',
+          'createdAt'
+        ])
+        && data.keys().hasOnly([
+          'authorUid',
+          'authorName',
+          'rating',
+          'category',
+          'message',
+          'status',
+          'createdAt',
+          'sampleId'
+        ])
+        && data.authorUid is string
+        && isValidId(data.authorUid)
+        && data.authorName is string
+        && data.authorName.size() >= 1
+        && data.authorName.size() <= 60
+        && data.rating is int
+        && data.rating >= 1
+        && data.rating <= 5
+        && data.category is string
+        && data.category.size() >= 1
+        && data.category.size() <= 40
+        && isValidFeedbackCategory(data.category)
+        && data.message is string
+        && data.message.size() >= 5
+        && data.message.size() <= 500
+        && data.status is string
+        && data.status.size() >= 1
+        && data.status.size() <= 20
+        && data.status == 'published'
+        && data.createdAt is timestamp
+        && (
+          !('sampleId' in data)
+          || (data.sampleId is int && data.sampleId >= 1 && data.sampleId <= 45)
+        );
+    }
+
+    // Portfolio & Commission Public Feedback Collection
+    match /feedback/{feedbackId} {
+      // Every portfolio visitor can view published reviews (zero PII stored)
+      allow get: if isValidId(feedbackId) && existing().status == 'published';
+      allow list: if existing().status == 'published';
+
+      // Verified signed-in visitors can create their own review
+      allow create: if isVerifiedUser()
+        && isValidId(feedbackId)
+        && isValidFeedback(incoming())
+        && incoming().authorUid == request.auth.uid
+        && incoming().createdAt == request.time;
+
+      // Action-based tiered update: admin override or author editing rating/message/category only
+      allow update: if isVerifiedUser()
+        && isValidId(feedbackId)
+        && isValidFeedback(incoming())
+        && incoming().authorUid == existing().authorUid
+        && incoming().createdAt == existing().createdAt
+        && (
+          isAdmin()
+          || (
+            existing().authorUid == request.auth.uid
+            && incoming().diff(existing()).affectedKeys().hasOnly([
+              'rating',
+              'message',
+              'category'
+            ])
+          )
+        );
+
+      // Author can delete their own review; verified owner admin can moderate any review
+      allow delete: if isVerifiedUser()
+        && isValidId(feedbackId)
+        && (isAdmin() || existing().authorUid == request.auth.uid);
+    }
+  }
+}

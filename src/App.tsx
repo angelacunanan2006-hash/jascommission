@@ -10,6 +10,7 @@ import {
   LayoutGrid,
   Mail,
   Menu,
+  MessageSquarePlus,
   Phone,
   ShieldCheck,
   SlidersHorizontal,
@@ -21,10 +22,12 @@ import {
   type CommissionPrefill,
 } from './components/CommissionBuilderModal';
 import { ConcernLetterModal } from './components/ConcernLetterModal';
+import { ErrorBoundary } from './components/ErrorBoundary';
 import { FaqSection } from './components/FaqSection';
 import { FloatingQuickDock } from './components/FloatingQuickDock';
 import { LightboxModal, type LightboxItem } from './components/LightboxModal';
 import { type PaymentPlatformName } from './components/PaymentAndAwareness';
+import { PortfolioFeedbackBoard } from './components/PortfolioFeedbackBoard';
 import { Reveal } from './components/Reveal';
 import { SampleWorksSection } from './components/SampleWorksSection';
 import { ServicesSection } from './components/ServicesSection';
@@ -85,6 +88,7 @@ export default function App() {
   const [toastMessage, setToastMessage] = useState<string | null>(null);
   const [feedbackView, setFeedbackView] = useState<'grid' | 'carousel'>('grid');
   const [activeFeedbackIdx, setActiveFeedbackIdx] = useState(0);
+  const [feedbackSample, setFeedbackSample] = useState<SampleWork | null>(null);
 
   const showToast = (msg: string) => {
     setToastMessage(msg);
@@ -167,6 +171,13 @@ export default function App() {
 
   const handleRequestSimilar = (sample: SampleWork) => {
     openBuilder({ category: sample.category, referenceSample: sample });
+  };
+
+  const handleFeedbackSample = (sample: SampleWork) => {
+    setFeedbackSample(sample);
+    document
+      .getElementById('leave-feedback')
+      ?.scrollIntoView({ behavior: 'smooth', block: 'start' });
   };
 
   const handleCommissionService = (
@@ -428,6 +439,7 @@ export default function App() {
           savedIds={savedSampleIds}
           onToggleSave={toggleSaveSample}
           onRequestSimilar={handleRequestSimilar}
+          onFeedbackSample={handleFeedbackSample}
           onOpenBuilderWithSaved={() => openBuilder()}
           externalCategory={sampleJump.category}
           externalCategoryTick={sampleJump.tick}
@@ -439,23 +451,37 @@ export default function App() {
           className="mt-14 border-y border-brand-line/70 bg-brand-tint py-12 sm:mt-20 sm:py-20"
         >
           <div className="mx-auto w-[min(1120px,100%-1.5rem)] sm:w-[min(1120px,100%-2.5rem)]">
-            <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+            <div className="flex flex-col gap-5 sm:flex-row sm:items-end sm:justify-between">
               <div className="max-w-2xl">
                 <h2 className="font-display text-[clamp(1.8rem,4vw,2.7rem)] leading-[1.1] font-extrabold tracking-[-0.02em] text-brand-red">
                   Client feedback
                 </h2>
                 <p className="mt-2.5 text-base text-brand-muted sm:text-[1.125rem]">
-                  What clients say after receiving their final file. Tap any
-                  screenshot to zoom in.
+                  What clients say after viewing our portfolio and receiving
+                  their final file. Tap any screenshot to zoom in or share your
+                  own review.
                 </p>
+
+                <div className="mt-5 flex flex-wrap items-center gap-3">
+                  <a
+                    href="#leave-feedback"
+                    className="inline-flex min-h-11 w-full items-center justify-center gap-2 rounded-full bg-brand-red px-6 py-2.5 text-sm font-semibold whitespace-nowrap text-white shadow-[0_8px_20px_rgba(211,20,28,0.28)] transition-all duration-150 hover:-translate-y-0.5 hover:bg-brand-deep sm:w-auto sm:text-base"
+                  >
+                    <MessageSquarePlus
+                      className="h-4.5 w-4.5 shrink-0"
+                      aria-hidden="true"
+                    />
+                    <span>Write a review / Leave feedback</span>
+                  </a>
+                </div>
               </div>
 
-              {/* Interactive View Switcher */}
-              <div className="inline-flex self-start rounded-xl border border-brand-line bg-white p-1 sm:self-end">
+              {/* Clean View Switcher (kept separate on the right) */}
+              <div className="inline-flex shrink-0 self-start rounded-xl border border-brand-line bg-white p-1 sm:self-end">
                 <button
                   type="button"
                   onClick={() => setFeedbackView('grid')}
-                  className={`inline-flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-semibold transition-colors ${
+                  className={`inline-flex items-center gap-1.5 rounded-lg px-3.5 py-2 text-xs font-semibold whitespace-nowrap transition-colors ${
                     feedbackView === 'grid'
                       ? 'bg-brand-red text-white'
                       : 'text-brand-muted hover:text-brand-ink'
@@ -467,13 +493,16 @@ export default function App() {
                 <button
                   type="button"
                   onClick={() => setFeedbackView('carousel')}
-                  className={`inline-flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-semibold transition-colors ${
+                  className={`inline-flex items-center gap-1.5 rounded-lg px-3.5 py-2 text-xs font-semibold whitespace-nowrap transition-colors ${
                     feedbackView === 'carousel'
                       ? 'bg-brand-red text-white'
                       : 'text-brand-muted hover:text-brand-ink'
                   }`}
                 >
-                  <SlidersHorizontal className="h-3.5 w-3.5" aria-hidden="true" />
+                  <SlidersHorizontal
+                    className="h-3.5 w-3.5"
+                    aria-hidden="true"
+                  />
                   <span>Spotlight</span>
                 </button>
               </div>
@@ -584,6 +613,15 @@ export default function App() {
                 </div>
               </div>
             )}
+
+            {/* Live Persistent Portfolio & Client Feedback Board */}
+            <ErrorBoundary fallbackTitle="Portfolio reviews are temporarily unavailable.">
+              <PortfolioFeedbackBoard
+                prefillSample={feedbackSample}
+                onClearPrefillSample={() => setFeedbackSample(null)}
+                onNotify={showToast}
+              />
+            </ErrorBoundary>
           </div>
         </section>
 

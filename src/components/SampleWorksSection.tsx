@@ -16,6 +16,7 @@ interface SampleWorksSectionProps {
   savedIds: number[];
   onToggleSave: (id: number) => void;
   onRequestSimilar: (sample: SampleWork) => void;
+  onFeedbackSample: (sample: SampleWork) => void;
   onOpenBuilderWithSaved: () => void;
   externalCategory?: SampleCategory | null;
   externalCategoryTick?: number;
@@ -110,6 +111,7 @@ export function SampleWorksSection({
   savedIds,
   onToggleSave,
   onRequestSimilar,
+  onFeedbackSample,
   onOpenBuilderWithSaved,
   externalCategory = null,
   externalCategoryTick = 0,
@@ -348,6 +350,11 @@ export function SampleWorksSection({
           const matched = SAMPLE_WORKS.find((w) => w.id === item.id);
           setLightboxIndex(null);
           if (matched) onRequestSimilar(matched);
+        }}
+        onLeaveFeedback={(item) => {
+          const matched = SAMPLE_WORKS.find((w) => w.id === item.id);
+          setLightboxIndex(null);
+          if (matched) onFeedbackSample(matched);
         }}
       />
     </section>

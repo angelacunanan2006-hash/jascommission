@@ -1,0 +1,82 @@
+{
+  "entities": {
+    "Feedback": {
+      "title": "Feedback",
+      "description": "A public portfolio or commission review submitted by a verified signed-in visitor.",
+      "type": "object",
+      "properties": {
+        "authorUid": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128,
+          "pattern": "^[a-zA-Z0-9_\\-]+$",
+          "description": "Firebase Auth UID of the reviewer."
+        },
+        "authorName": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 60,
+          "description": "Public display name chosen by the reviewer (no email or phone PII)."
+        },
+        "rating": {
+          "type": "integer",
+          "description": "Star rating from 1 to 5."
+        },
+        "category": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 40,
+          "enum": [
+            "Portfolio & General",
+            "Graphic & Video",
+            "Research & Docs",
+            "IT & Coding",
+            "Data & Excel",
+            "Architecture & CAD",
+            "AI Services"
+          ],
+          "description": "Service or portfolio area being reviewed."
+        },
+        "message": {
+          "type": "string",
+          "minLength": 5,
+          "maxLength": 500,
+          "description": "Written feedback message."
+        },
+        "sampleId": {
+          "type": "integer",
+          "description": "Optional portfolio sample ID (1-45) referenced by the review."
+        },
+        "status": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 20,
+          "enum": ["published"],
+          "description": "Publication status enforced on reads and writes."
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Server-assigned creation timestamp (request.time)."
+        }
+      },
+      "required": [
+        "authorUid",
+        "authorName",
+        "rating",
+        "category",
+        "message",
+        "status",
+        "createdAt"
+      ]
+    }
+  },
+  "firestore": {
+    "/feedback/{feedbackId}": {
+      "schema": {
+        "$ref": "#/entities/Feedback"
+      },
+      "description": "Public portfolio and commission reviews submitted by verified Google-authenticated visitors."
+    }
+  }
+}

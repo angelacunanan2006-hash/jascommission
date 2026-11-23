@@ -1,5 +1,12 @@
 import { type TouchEvent, useEffect, useRef } from 'react';
-import { Bookmark, ChevronLeft, ChevronRight, FileText, X } from 'lucide-react';
+import {
+  Bookmark,
+  ChevronLeft,
+  ChevronRight,
+  FileText,
+  MessageSquarePlus,
+  X,
+} from 'lucide-react';
 
 export interface LightboxItem {
   id?: number;
@@ -15,6 +22,7 @@ interface LightboxModalProps {
   onClose: () => void;
   onNavigate: (nextIndex: number) => void;
   onCommissionSimilar?: (item: LightboxItem) => void;
+  onLeaveFeedback?: (item: LightboxItem) => void;
   isSaved?: (item: LightboxItem) => boolean;
   onToggleSave?: (item: LightboxItem) => void;
 }
@@ -25,6 +33,7 @@ export function LightboxModal({
   onClose,
   onNavigate,
   onCommissionSimilar,
+  onLeaveFeedback,
   isSaved,
   onToggleSave,
 }: LightboxModalProps) {
@@ -128,6 +137,16 @@ export function LightboxModal({
                 </span>
               </button>
             )}
+            {onLeaveFeedback && (
+              <button
+                type="button"
+                onClick={() => onLeaveFeedback(current)}
+                className="hidden items-center gap-1.5 rounded-lg border border-brand-line bg-white px-3 py-2 text-xs font-semibold whitespace-nowrap text-brand-ink transition-colors duration-150 hover:border-brand-red hover:text-brand-red sm:inline-flex"
+              >
+                <MessageSquarePlus className="h-3.5 w-3.5 text-brand-red" aria-hidden="true" />
+                <span>Leave feedback</span>
+              </button>
+            )}
             {onCommissionSimilar && (
               <button
                 type="button"
@@ -184,17 +203,31 @@ export function LightboxModal({
           )}
         </div>
 
-        {onCommissionSimilar && (
-          <div className="flex items-center justify-between gap-3 border-t border-brand-line bg-white px-5 py-3 sm:hidden">
-            <span className="text-xs text-brand-muted">Need a similar output?</span>
-            <button
-              type="button"
-              onClick={() => onCommissionSimilar(current)}
-              className="inline-flex items-center gap-1.5 rounded-lg bg-brand-red px-3.5 py-2 text-xs font-semibold whitespace-nowrap text-white"
-            >
-              <FileText className="h-3.5 w-3.5" aria-hidden="true" />
-              <span>Request similar</span>
-            </button>
+        {(onCommissionSimilar || onLeaveFeedback) && (
+          <div className="flex items-center justify-between gap-2 border-t border-brand-line bg-white px-4 py-3 sm:hidden">
+            {onLeaveFeedback && (
+              <button
+                type="button"
+                onClick={() => onLeaveFeedback(current)}
+                className="inline-flex min-h-10 flex-1 items-center justify-center gap-1.5 rounded-lg border border-brand-line bg-white px-3 py-2 text-xs font-semibold whitespace-nowrap text-brand-ink"
+              >
+                <MessageSquarePlus
+                  className="h-3.5 w-3.5 text-brand-red"
+                  aria-hidden="true"
+                />
+                <span>Feedback</span>
+              </button>
+            )}
+            {onCommissionSimilar && (
+              <button
+                type="button"
+                onClick={() => onCommissionSimilar(current)}
+                className="inline-flex min-h-10 flex-1 items-center justify-center gap-1.5 rounded-lg bg-brand-red px-3.5 py-2 text-xs font-semibold whitespace-nowrap text-white"
+              >
+                <FileText className="h-3.5 w-3.5" aria-hidden="true" />
+                <span>Request similar</span>
+              </button>
+            )}
           </div>
         )}
       </div>
